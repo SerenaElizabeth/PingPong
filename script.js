@@ -41,7 +41,7 @@ let gameRunning = false
 
 //ball move in different directions at random
 function randomizeDirection() {
-    const randomX = Math.ceil(Math.random() * 3) + 1; //random num between 2-4
+    const randomX = Math.ceil(Math.random() * 2) + 1; //random num between 2-4
     const randomY = Math.round(Math.random() * 3); //random num between 0-2
     const plusOrMinusX = Math.random() < 0.5 ? "-" : "+"; //50% change of being positive or negative 
     const plusOrMinusY = Math.random() < 0.5 ? "-" : "+";
