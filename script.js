@@ -1,8 +1,25 @@
 const canvas = document.querySelector('canvas')
 canvas.width = 800;
 canvas.height = 400;
+let loopMs = 15
+console.log(loopMs)
 
 const ctx = canvas.getContext('2d') //gives us access to the 2d drawing features
+
+let modeButtons = document.getElementsByClassName('mode-button')
+for (let i = 0; i < modeButtons.length; i++) {
+    modeButtons[i].addEventListener('click', (e) => changeMode(e))
+
+}
+
+
+function changeMode(e) {
+    console.log(e.target.id)
+    loopMs = Number(e.target.attributes['data-mode-ms'].value)
+    document.querySelector(".selected").classList.remove("selected")
+    document.getElementById(e.target.id).classList.add("selected")
+    console.log(loopMs)
+}
 
 //set game variables
 
@@ -16,20 +33,21 @@ let playerPosition = canvas.height / 2
 let computerPosition = canvas.height / 2
 const winnerScore = 3
 
-let moveX = -2
-let moveY = 1
+let moveX;
+let moveY;
 let ballRadius = 10
 let gameloop;
 let gameRunning = false
 
 //ball move in different directions at random
 function randomizeDirection() {
-    const randomX = Math.ceil(Math.random() * 3) + 1;
-    const randomY = Math.round(Math.random() * 3);
-    const plusOrMinusX = Math.random() < 0.5 ? "-" : "+";
+    const randomX = Math.ceil(Math.random() * 3) + 1; //random num between 2-4
+    const randomY = Math.round(Math.random() * 3); //random num between 0-2
+    const plusOrMinusX = Math.random() < 0.5 ? "-" : "+"; //50% change of being positive or negative 
     const plusOrMinusY = Math.random() < 0.5 ? "-" : "+";
-    moveX = Number(plusOrMinusX + randomX)
-    moveY = Number(plusOrMinusY + randomY)
+    const randomNumber = Math.random()
+    moveX = Number(plusOrMinusX + randomX) + randomNumber; //create a number from the string '+' or '-' and the number
+    moveY = Number(plusOrMinusY + randomY) + randomNumber;
 }
 
 //listen for arrows / space to be pressed
@@ -40,25 +58,28 @@ function handleKeyPressed(e) {
             startGame()
             break;
         case "ArrowUp":
-            if (playerPosition - paddleHeight / 2 <= 0) return;
+            if (playerPosition - paddleHeight / 2 <= 0) return; //checks if paddle is already at top of canvas and returns out if it is
             playerPosition -= 15; //move paddle up when up arrow pressed 
             break;
         case "ArrowDown":
-            if (playerPosition + paddleHeight / 2 >= canvas.height) return;
+            if (playerPosition + paddleHeight / 2 >= canvas.height) return; //checks if paddle is already at bottom of canvas and returns out if it is
             playerPosition += 15;
             break;
     }
 }
 
 function startGame() {
-    if (gameRunning) return
+    if (gameRunning) return; //prevents game from restarting if already running
     gameRunning = true
     randomizeDirection()
     ballX = canvas.width / 2
     playerScore = 0 //reset scores
     computerScore = 0
     clearInterval(gameloop)
-    gameloop = setInterval(loop, 15) //calls loop function every 15 ms (draws ball every 15s)
+    gameloop = setInterval(loop, loopMs) //calls loop function every 15 ms (draws ball every 15s)
+    for (let i = 0; i < modeButtons.length; i++) { //disable mode buttons when game running
+        modeButtons[i].disabled = true
+    }
 }
 
 ctx.fillStyle = "limegreen"
@@ -112,6 +133,13 @@ function createBoardMarkings() {
     ctx.stroke()
 }
 
+//add random bounce so bounce isn't always at 90 degrees
+function randomBounce() {
+    const randomNum = Math.floor(Math.random() * 3) // 0 or 1
+    const positiveOrNegative = randomNum === 0 ? "-" : "+"
+    return Number(positiveOrNegative + Math.random() / 2) //returns number between 0 and 0.5
+}
+
 //check for collision every time ball moves
 function collide() {
 
@@ -129,11 +157,8 @@ function collide() {
 
     //check player paddle collision
     if (ballX <= ballRadius + paddleWidth && Math.abs(ballY - playerPosition) <= paddleHeight / 2 + ballRadius) {
-        console.log(moveX)
         moveX = -moveX + randomBounce()
-        console.log(moveX)
     }
-
 
     //check computer paddle collision
     if (ballX + ballRadius >= canvas.width - paddleWidth && Math.abs(ballY - computerPosition) <= paddleHeight / 2 + ballRadius) {
@@ -161,8 +186,19 @@ function score(player) {
 
 }
 
+function computerMovement() {
+    if (computerPosition < ballY) {
+        computerPosition++
+    } else {
+        computerPosition--
+    }
+}
+
 function endgame(winner) {
     gameRunning = false
+    for (let i = 0; i < modeButtons.length; i++) {
+        modeButtons[i].disabled = false
+    }
     clearInterval(gameloop)
     ctx.clearRect(0, 0, canvas.width, canvas.height) //clear canvas
     createScoreText()
@@ -178,19 +214,7 @@ function endgame(winner) {
 
 }
 
-function computerMovement() {
-    if (computerPosition < ballY) {
-        computerPosition++
-    } else {
-        computerPosition--
-    }
-}
 
-function randomBounce() {
-    const randomNum = Math.floor(Math.random() * 2)
-    const positiveOrNegative = randomNum === 0 ? "-" : "+"
-    return Number(positiveOrNegative + Math.random() / 2)
-}
 
 function loop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height) //clear canvas

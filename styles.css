@@ -9,3 +9,26 @@ canvas {
     border: 10px solid limegreen;
 
 }
+
+.mode-button-container {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    padding: 30px;
+}
+
+.mode-button {
+    color: limegreen;
+    font-family: 'Courier New';
+    font-size: 19px;
+    background: black;
+    height: 30px;
+}
+
+.mode-button:disabled {
+    color: grey !important;
+}
+
+.selected {
+    border-bottom: 2px solid limegreen;
+}
